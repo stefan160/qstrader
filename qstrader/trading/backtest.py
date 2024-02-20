@@ -120,6 +120,10 @@ class BacktestTradingSession(TradingSession):
             self.rebalance_schedule = HourlyRebalance(
                 self.start_dt, self.end_dt
             ).rebalances
+        elif rebalance == "hourly":
+            self.rebalance_schedule = HourlyRebalance(
+                self.start_dt, self.end_dt
+            ).rebalances
         self.rebalance_schedule = self._create_rebalance_event_times()
 
         self.qts = self._create_quant_trading_system(**kwargs)
