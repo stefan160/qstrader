@@ -12,6 +12,7 @@ from qstrader.simulation.daily_bday import DailyBusinessDaySimulationEngine
 from qstrader.system.qts import QuantTradingSystem
 from qstrader.system.rebalance.buy_and_hold import BuyAndHoldRebalance
 from qstrader.system.rebalance.daily import DailyRebalance
+from qstrader.system.rebalance.hourly import HourlyRebalance
 from qstrader.system.rebalance.end_of_month import EndOfMonthRebalance
 from qstrader.system.rebalance.weekly import WeeklyRebalance
 from qstrader.trading.trading_session import TradingSession
@@ -115,6 +116,10 @@ class BacktestTradingSession(TradingSession):
                     "keyword argument to the instantiation of "
                     "BacktestTradingSession, e.g. with 'WED'."
                 )
+        elif rebalance == "hourly":
+            self.rebalance_schedule = HourlyRebalance(
+                self.start_dt, self.end_dt
+            ).rebalances
         self.rebalance_schedule = self._create_rebalance_event_times()
 
         self.qts = self._create_quant_trading_system(**kwargs)
