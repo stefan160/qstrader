@@ -127,3 +127,50 @@ def test_backtest_long_short_leveraged(etf_filepath):
 
     pd.testing.assert_frame_equal(history_df, expected_df)
     assert portfolio_dict == expected_dict
+from qstrader.system.rebalance.hourly import HourlyRebalance
+def test_backtest_hourly_rebalance_alpha_model_call(etf_filepath):
+    """
+    Ensures that a full end-to-end hourly rebalanced backtested
+    trading session with fixed proportion weights produces the
+    correct rebalance orders as well as correctly calculated
+    market values after a single day's worth of hourly
+    backtesting.
+    """
+    os.environ['QSTRADER_CSV_DATA_DIR'] = etf_filepath
+
+    assets = ['EQ:ABC', 'EQ:DEF']
+    universe = StaticUniverse(assets)
+    signal_weights = {'EQ:ABC': 0.6, 'EQ:DEF': 0.4}
+    alpha_model = FixedSignalsAlphaModel(signal_weights)
+
+    start_dt = pd.Timestamp('2019-01-01 08:00:00', tz=pytz.UTC)
+    end_dt = pd.Timestamp('2019-01-01 16:00:00', tz=pytz.UTC)
+
+    backtest = BacktestTradingSession(
+        start_dt,
+        end_dt,
+        universe,
+        alpha_model,
+        portfolio_id='000001',
+        rebalance='hourly',
+        pre_market=True,
+        long_only=True,
+        cash_buffer_percentage=0.05
+    )
+    backtest.run(results=False)
+
+    portfolio = backtest.broker.portfolios['000001']
+
+    # Check that the alpha model was called for each hourly rebalance
+    # during market open hours (14:30 to 21:00 UTC)
+    market_open_hours = pd.date_range(
+        start=backtest.start_dt,
+        end=backtest.end_dt,
+        freq='H',
+        tz=pytz.UTC
+    ).between_time('14:30', '21:00')
+    for market_hour in market_open_hours:
+        assert market_hour in alpha_model.call_times
+
+    # Check that the portfolio has been rebalanced hourly
+    assert len(portfolio.history) == market_open_hours.shape[0]
