@@ -572,6 +572,16 @@ class SimulatedBroker(Broker):
 
         # Calculate the consideration and total commission
         # based on the commission model
+        if order.is_limit_order():
+            # For limit orders, check if the limit price is met
+            if (order.direction > 0 and bid_ask[1] <= order.limit_price) or \
+               (order.direction < 0 and bid_ask[0] >= order.limit_price):
+                price = order.limit_price
+            else:
+                # If the limit price is not met, the order is not executed
+                return
+        else:
+            # For market orders, use the current bid/ask price
         if order.direction > 0:
             price = bid_ask[1]
         else:

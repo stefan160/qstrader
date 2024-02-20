@@ -34,6 +34,9 @@ class Order(object):
         quantity,
         commission=0.0,
         order_id=None
+        order_id=None,
+        order_type='MARKET',
+        limit_price=None
     ):
         self.created_dt = dt
         self.cur_dt = dt
@@ -42,6 +45,8 @@ class Order(object):
         self.commission = commission
         self.direction = np.copysign(1, self.quantity)
         self.order_id = self._set_or_generate_order_id(order_id)
+        self.order_type = order_type
+        self.limit_price = limit_price
 
     def _order_attribs_equal(self, other):
         """
@@ -109,3 +114,14 @@ class Order(object):
             return uuid.uuid4().hex
         else:
             return order_id
+
+    def is_limit_order(self):
+        """
+        Checks if the order is a limit order.
+
+        Returns
+        -------
+        `bool`
+            True if the order is a limit order, False otherwise.
+        """
+        return self.order_type.upper() == 'LIMIT'
