@@ -94,6 +94,7 @@ class BacktestTradingSession(TradingSession):
         self.account_name = account_name
         self.portfolio_id = portfolio_id
         self.portfolio_name = portfolio_name
+        self.submit_orders = kwargs.get('submit_orders', False)
         self.long_only = long_only
         self.fee_model = fee_model
         self.burn_in_dt = burn_in_dt
