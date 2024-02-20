@@ -1,0 +1,25 @@
+digraph backtest_workflow {
+    rankdir=LR;
+    node [shape=rectangle, style=filled, fillcolor=lightblue];
+
+    Initialization -> AssetUniverse;
+    AssetUniverse -> AlphaModel;
+    AlphaModel -> RiskModel [label="optional"];
+    RiskModel -> PortfolioConstruction;
+    AlphaModel -> PortfolioConstruction [style=dotted];
+    PortfolioConstruction -> OrderSizing;
+    OrderSizing -> Optimization [label="optional"];
+    Optimization -> ExecutionHandling;
+    ExecutionHandling -> SimulationEngine;
+    SimulationEngine -> PerformanceTracking;
+    PerformanceTracking -> Output;
+
+    subgraph cluster_execution {
+        label="Execution Loop";
+        SimulationEngine -> AlphaModel;
+        AlphaModel -> PortfolioConstruction;
+        PortfolioConstruction -> OrderSizing;
+        OrderSizing -> ExecutionHandling;
+        ExecutionHandling -> PerformanceTracking;
+    }
+}
