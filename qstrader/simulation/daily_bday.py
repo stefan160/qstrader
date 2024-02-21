@@ -58,9 +58,7 @@ class DailyBusinessDaySimulationEngine(SimulationEngine):
         `list[pd.Timestamp]`
             The business day range list.
         """
-        days = pd.date_range(
-            self.starting_day, self.ending_day, freq=BDay()
-        )
+        days = pd.date_range(self.starting_day, self.ending_day, freq=BDay())
         return days
 
     def __iter__(self):
@@ -80,28 +78,48 @@ class DailyBusinessDaySimulationEngine(SimulationEngine):
 
             if self.pre_market:
                 yield SimulationEvent(
-                    pd.Timestamp(
-                        datetime.datetime(year, month, day), tz='UTC'
-                    ), event_type="pre_market"
+                    pd.Timestamp(datetime.datetime(year, month, day), tz="UTC"),
+                    event_type="pre_market",
                 )
 
             yield SimulationEvent(
-                pd.Timestamp(
-                    datetime.datetime(year, month, day, 14, 30),
-                    tz=pytz.utc
-                ), event_type="market_open"
+                pd.Timestamp(datetime.datetime(year, month, day, 14, 30), tz=pytz.utc),
+                event_type="market_open",
             )
 
             yield SimulationEvent(
-                pd.Timestamp(
-                    datetime.datetime(year, month, day, 21, 00),
-                    tz=pytz.utc
-                ), event_type="market_close"
+                pd.Timestamp(datetime.datetime(year, month, day, 21, 00), tz=pytz.utc),
+                event_type="market_close",
             )
 
             if self.post_market:
                 yield SimulationEvent(
-                    pd.Timestamp(
-                        datetime.datetime(year, month, day, 23, 59), tz='UTC'
-                    ), event_type="post_market"
+                    pd.Timestamp(datetime.datetime(year, month, day, 23, 59), tz="UTC"),
+                    event_type="post_market",
                 )
+
+
+class HourlyBusinessDaySimulationEngine(SimulationEngine):
+    """
+    A SimulationEngine subclass that generates events on a hourly
+    frequency limited to hours on typical business days
+    between the starting and ending dates. Business days are from
+    Monday to Friday. Defaulting to event within trading hours,
+    that is 14:30 to 21:00 UTC every business day. Events only
+    occur on whole hours. With pre_market set events before 14:30
+    are generated as well and with post_market set the events
+    after 21:00 are generated as well. es.
+
+    Parameters
+    ----------
+    starting_day : `pd.Timestamp`
+        The starting day of the simulation.
+    ending_day : `pd.Timestamp`
+        The ending day of the simulation.
+    pre_market : `Boolean`, optional
+        Whether to include a pre-market event
+    post_market : `Boolean`, optional
+        Whether to include a post-market event
+    """
+
+    # complete the class
