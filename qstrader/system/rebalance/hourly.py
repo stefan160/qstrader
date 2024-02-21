@@ -36,16 +36,20 @@ class HourlyRebalance(Rebalance):
             The list of rebalance timestamps.
         """
 
-        # range of all hours in the dates
-        rebalances = pd.date_range(
-            start=self.start_date, end=self.end_date, freq="h", tz=pytz.UTC
+        # Generate a date range for each business day
+        business_days = pd.date_range(
+            start=self.start_date, end=self.end_date, freq='B', tz=pytz.UTC
         )
 
-        # filter for hours within market hours
-        rebalances_market_hours = rebalances[
-            rebalances.indexer_between_time("14:30", "21:00")
-        ]
+        # Generate hourly timestamps within each business day
+        hourly_rebalances = []
+        for day in business_days:
+            business_hours = pd.date_range(
+                start=day + pd.Timedelta(hours=14, minutes=30),
+                end=day + pd.Timedelta(hours=21),
+                freq=Hour(),
+                tz=pytz.UTC
+            )
+            hourly_rebalances.extend(business_hours)
 
-        rebalance_times = [pd.Timestamp(time) for time in rebalances_market_hours]
-
-        return rebalance_times
+        return hourly_rebalances
