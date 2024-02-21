@@ -121,5 +121,61 @@ class HourlyBusinessDaySimulationEngine(SimulationEngine):
     post_market : `Boolean`, optional
         Whether to include a post-market event
     """
+    def __init__(self, starting_day, ending_day, pre_market=False, post_market=False):
+        self.starting_day = starting_day
+        self.ending_day = ending_day
+        self.pre_market = pre_market
+        self.post_market = post_market
+        self.business_days = self._generate_business_days()
+
+    def _generate_business_days(self):
+        """
+        Generate the list of business days using midnight UTC as
+        the timestamp.
+
+        Returns
+        -------
+        `list[pd.Timestamp]`
+            The business day range list.
+        """
+        days = pd.date_range(self.starting_day, self.ending_day, freq=BDay())
+        return days
+
+    def __iter__(self):
+        """
+        Generate the hourly timestamps and event information
+        for pre-market, market open, market close and post-market.
+
+        Yields
+        ------
+        `SimulationEvent`
+            Market time simulation event to yield
+        """
+        for index, bday in enumerate(self.business_days):
+            year = bday.year
+            month = bday.month
+            day = bday.day
+
+            if self.pre_market:
+                yield SimulationEvent(
+                    pd.Timestamp(datetime.datetime(year, month, day), tz="UTC"),
+                    event_type="pre_market",
+                )
+
+            yield SimulationEvent(
+                pd.Timestamp(datetime.datetime(year, month, day, 14, 30), tz=pytz.utc),
+                event_type="market_open",
+            )
+
+            yield SimulationEvent(
+                pd.Timestamp(datetime.datetime(year, month, day, 21, 00), tz=pytz.utc),
+                event_type="market_close",
+            )
+
+            if self.post_market:
+                yield SimulationEvent(
+                    pd.Timestamp(datetime.datetime(year, month, day, 23, 59), tz="UTC"),
+                    event_type="post_market",
+                )
 
     # complete the class
