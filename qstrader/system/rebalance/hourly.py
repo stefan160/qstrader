@@ -1,5 +1,6 @@
 from qstrader.system.rebalance.rebalance import Rebalance
 from pandas.tseries.offsets import Hour
+from qstrader.utils.times import BusinessHours
 import pandas as pd
 import pytz
 
@@ -21,35 +22,17 @@ class HourlyRebalance(Rebalance):
         Whether to carry out the rebalance at market open/close.
     """
 
-    def __init__(self, start_date, end_date, pre_market=False):
+    def __init__(self, start_date, end_date, pre_market=False, post_market=False):
         self.start_date = start_date
         self.end_date = end_date
-        self.rebalances = self._generate_rebalances()
-
-    def _generate_rebalances(self):
-        """
-        Output the rebalance timestamp list.
-
-        Returns
-        -------
-        `list[pd.Timestamp]`
-            The list of rebalance timestamps.
-        """
-
-        # Generate a date range for each business day
-        business_days = pd.date_range(
-            start=self.start_date, end=self.end_date, freq='B', tz=pytz.UTC
-        )
-
-        # Generate hourly timestamps within each business day
-        hourly_rebalances = []
-        for day in business_days:
-            business_hours = pd.date_range(
-                start=day + pd.Timedelta(hours=14, minutes=30),
-                end=day + pd.Timedelta(hours=21),
-                freq=Hour(),
-                tz=pytz.UTC
-            )
-            hourly_rebalances.extend(business_hours)
-
-        return hourly_rebalances
+        self.pre_market = pre_market
+        self.post_market = post_market
+        self.rebalances = [
+            event
+            for event in BusinessHours(
+                start_date=start_date,
+                end_date=end_date,
+                pre_market=pre_market,
+                post_market=post_market,
+            ).rebalances
+        ]

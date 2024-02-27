@@ -2,13 +2,22 @@ import os
 
 import pandas as pd
 
+from typing import Optional, Any
+
 from qstrader.asset.equity import Equity
+from qstrader.alpha_model.alpha_model import AlphaModel
+from qstrader.asset.universe.universe import Universe
+from qstrader.risk_model.risk_model import RiskModel
+from qstrader.signals.signals_collection import SignalsCollection
 from qstrader.broker.simulated_broker import SimulatedBroker
-from qstrader.broker.fee_model.zero_fee_model import ZeroFeeModel
+from qstrader.broker.fee_model.zero_fee_model import ZeroFeeModel, FeeModel
 from qstrader.data.backtest_data_handler import BacktestDataHandler
 from qstrader.data.daily_bar_csv import CSVDailyBarDataSource
 from qstrader.exchange.simulated_exchange import SimulatedExchange
-from qstrader.simulation.daily_bday import DailyBusinessDaySimulationEngine
+from qstrader.simulation.daily_bday import (
+    BusinessDaysSimulationEngine,
+    BusinessHoursSimulationEngine,
+)
 from qstrader.system.qts import QuantTradingSystem
 from qstrader.system.rebalance.buy_and_hold import BuyAndHoldRebalance
 from qstrader.system.rebalance.daily import DailyRebalance
@@ -67,23 +76,23 @@ class BacktestTradingSession(TradingSession):
 
     def __init__(
         self,
-        start_dt,
-        end_dt,
-        universe,
-        alpha_model,
-        risk_model=None,
-        signals=None,
-        initial_cash=1e6,
-        rebalance="weekly",
-        account_name=DEFAULT_ACCOUNT_NAME,
-        portfolio_id=DEFAULT_PORTFOLIO_ID,
-        portfolio_name=DEFAULT_PORTFOLIO_NAME,
-        long_only=False,
-        fee_model=ZeroFeeModel(),
-        burn_in_dt=None,
-        data_handler=None,
-        submit_orders=False,
-        **kwargs
+        start_dt: pd.Timestamp,
+        end_dt: pd.Timestamp,
+        universe: Universe,
+        alpha_model: AlphaModel,
+        risk_model: Optional[RiskModel] = None,
+        signals: Optional[SignalsCollection] = None,
+        initial_cash: float = 1e6,
+        rebalance: str = "weekly",
+        account_name: str = DEFAULT_ACCOUNT_NAME,
+        portfolio_id: str = DEFAULT_PORTFOLIO_ID,
+        portfolio_name: str = DEFAULT_PORTFOLIO_NAME,
+        long_only: bool = False,
+        fee_model: FeeModel = ZeroFeeModel(),
+        burn_in_dt: Optional[pd.Timestamp] = None,
+        data_handler: Optional[BacktestDataHandler] = None,
+        submit_orders: bool = False,
+        **kwargs: Any,
     ):
         self.start_dt = start_dt
         self.end_dt = end_dt
@@ -116,21 +125,21 @@ class BacktestTradingSession(TradingSession):
                     "keyword argument to the instantiation of "
                     "BacktestTradingSession, e.g. with 'WED'."
                 )
-        elif rebalance == "hourly":
-            self.rebalance_schedule = HourlyRebalance(
-                self.start_dt, self.end_dt
-            ).rebalances
-        elif rebalance == "hourly":
-            self.rebalance_schedule = HourlyRebalance(
-                self.start_dt, self.end_dt
-            ).rebalances
+        # elif rebalance == "daily":
+        #     self.rebalance_schedule = DailyRebalance(
+        #         self.start_dt, self.end_dt
+        #     ).rebalances
+        # elif rebalance == "hourly":
+        #     self.rebalance_schedule = HourlyRebalance(
+        #         self.start_dt, self.end_dt
+        #     ).rebalances
         self.rebalance_schedule = self._create_rebalance_event_times()
 
         self.qts = self._create_quant_trading_system(**kwargs)
         self.equity_curve = []
         self.target_allocations = []
 
-    def _is_rebalance_event(self, dt):
+    def _is_rebalance_event(self, dt: pd.Timestamp):
         """
         Checks if the provided timestamp is part of the rebalance
         schedule of the backtest.
@@ -145,6 +154,9 @@ class BacktestTradingSession(TradingSession):
         `Boolean`
             Whether the timestamp is part of the rebalance schedule.
         """
+        if self.rebalance == "hourly":
+            return True
+
         return dt in self.rebalance_schedule
 
     def _create_exchange(self):
@@ -159,7 +171,7 @@ class BacktestTradingSession(TradingSession):
         """
         return SimulatedExchange(self.start_dt)
 
-    def _create_data_handler(self, data_handler):
+    def _create_data_handler(self, data_handler: BacktestDataHandler):
         """
         Creates a DataHandler instance to load the asset pricing data
         used within the backtest.
@@ -228,16 +240,35 @@ class BacktestTradingSession(TradingSession):
         Create a simulation engine instance to generate the events
         used for the quant trading algorithm to act upon.
 
-        TODO: Currently hardcoded to daily events
-
         Returns
         -------
         `SimulationEngine`
             The simulation engine generating simulation timestamps.
         """
-        return DailyBusinessDaySimulationEngine(
-            self.start_dt, self.end_dt, pre_market=False, post_market=False
-        )
+        if self.rebalance == "buy_and_hold":
+            return BusinessDaysSimulationEngine(
+                self.start_dt, self.end_dt, pre_market=False, post_market=False
+            )
+        elif self.rebalance == "daily":
+            return BusinessDaysSimulationEngine(
+                self.start_dt, self.end_dt, pre_market=False, post_market=False
+            )
+        elif self.rebalance == "hourly":
+            return BusinessHoursSimulationEngine(
+                self.start_dt, self.end_dt, pre_market=False, post_market=False
+            )
+        elif self.rebalance == "weekly":
+            return BusinessDaysSimulationEngine(
+                self.start_dt, self.end_dt, pre_market=False, post_market=False
+            )
+        elif self.rebalance == "end_of_month":
+            return BusinessDaysSimulationEngine(
+                self.start_dt, self.end_dt, pre_market=False, post_market=False
+            )
+        else:
+            raise ValueError(
+                'Unknown rebalance frequency "%s" provided.' % self.rebalance
+            )
 
     def _create_rebalance_event_times(self):
         """
@@ -253,6 +284,8 @@ class BacktestTradingSession(TradingSession):
             rebalancer = BuyAndHoldRebalance(self.start_dt)
         elif self.rebalance == "daily":
             rebalancer = DailyRebalance(self.start_dt, self.end_dt)
+        elif self.rebalance == "hourly":
+            rebalancer = HourlyRebalance(self.start_dt, self.end_dt)
         elif self.rebalance == "weekly":
             rebalancer = WeeklyRebalance(
                 self.start_dt, self.end_dt, self.rebalance_weekday
@@ -319,7 +352,7 @@ class BacktestTradingSession(TradingSession):
 
         return qts
 
-    def _update_equity_curve(self, dt):
+    def _update_equity_curve(self, dt: pd.Timestamp):
         """
         Update the equity curve values.
 
@@ -370,7 +403,7 @@ class BacktestTradingSession(TradingSession):
             alloc_df = alloc_df[self.burn_in_dt :]
         return alloc_df
 
-    def run(self, results=False):
+    def run(self, results: bool = False):
         """
         Execute the simulation engine by iterating over all
         simulation events, rebalancing the quant trading
@@ -416,12 +449,12 @@ class BacktestTradingSession(TradingSession):
             # Out of market hours we want a daily
             # performance update, but only if we
             # are past the 'burn in' period
-            if event.event_type == "market_close":
-                if self.burn_in_dt is not None:
-                    if dt >= self.burn_in_dt:
-                        self._update_equity_curve(dt)
-                else:
+            # if event.event_type == "market_close":
+            if self.burn_in_dt is not None:
+                if dt >= self.burn_in_dt:
                     self._update_equity_curve(dt)
+            else:
+                self._update_equity_curve(dt)
 
         self.target_allocations = stats["target_allocations"]
 

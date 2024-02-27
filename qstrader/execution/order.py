@@ -1,6 +1,10 @@
-import uuid
+""" Order.py """
 
+import uuid
+from typing import Optional
 import numpy as np
+import pandas as pd
+from qstrader.asset.asset import Asset
 
 
 class Order(object):
@@ -29,14 +33,13 @@ class Order(object):
 
     def __init__(
         self,
-        dt,
-        asset,
-        quantity,
-        commission=0.0,
-        order_id=None
-        order_id=None,
-        order_type='MARKET',
-        limit_price=None
+        dt: pd.Timestamp,
+        asset: Asset,
+        quantity: int,
+        commission: float = 0.0,
+        order_id: Optional[str] = None,
+        order_type: str = "MARKET",
+        limit_price: Optional[float] = None,
     ):
         self.created_dt = dt
         self.cur_dt = dt
@@ -90,9 +93,14 @@ class Order(object):
         """
         return (
             "Order(dt='%s', asset='%s', quantity=%s, "
-            "commission=%s, direction=%s, order_id=%s)" % (
-                self.created_dt, self.asset, self.quantity,
-                self.commission, self.direction, self.order_id
+            "commission=%s, direction=%s, order_id=%s)"
+            % (
+                self.created_dt,
+                self.asset,
+                self.quantity,
+                self.commission,
+                self.direction,
+                self.order_id,
             )
         )
 
@@ -124,4 +132,4 @@ class Order(object):
         `bool`
             True if the order is a limit order, False otherwise.
         """
-        return self.order_type.upper() == 'LIMIT'
+        return self.order_type.upper() == "LIMIT"
