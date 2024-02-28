@@ -1,0 +1,23 @@
+```mermaid
+graph TD
+    A[Start Backtest] --> B[Initialize Trading Session]
+    B --> C[Load Asset Universe]
+    C --> D[Create Broker]
+    D --> E[Create Data Handler]
+    E --> F[Create Alpha Model]
+    F --> G[Create Risk Model]
+    G --> H[Create Portfolio Construction Model]
+    H --> I[Create Execution Handler]
+    I --> J[Create Simulation Engine]
+    J --> K[Run Trading Loop]
+    K --> L[Check Rebalance Event]
+    L -->|Yes| M[Generate Orders]
+    L -->|No| N[Update Portfolio Values]
+    M --> O[Execute Orders]
+    O --> N
+    N --> P[Update Statistics]
+    P --> Q[End of Backtest?]
+    Q -->|Yes| R[Output Results]
+    Q -->|No| K
+    R --> S[End Backtest]
+```
