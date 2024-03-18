@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import pytz
 
-from qstrader.simulation.daily_bday import BusinessDaysSimulationEngine
+from qstrader.simulation.bday import BusinessDaysSimulationEngine
 from qstrader.simulation.event import SimulationEvent
 
 

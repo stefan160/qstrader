@@ -1,4 +1,6 @@
-from qstrader.asset.asset import Asset
+""" Cash asset class."""
+
+from .asset import Asset
 
 
 class Cash(Asset):
@@ -11,9 +13,6 @@ class Cash(Asset):
         The currency of the Cash Asset. Defaults to USD.
     """
 
-    def __init__(
-        self,
-        currency='USD'
-    ):
+    def __init__(self, currency: str = "USD"):
         self.cash_like = True
         self.currency = currency

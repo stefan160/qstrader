@@ -1,4 +1,9 @@
-from qstrader.asset.universe.universe import Universe
+""" Dynamic Universe class. """
+
+import pandas as pd
+from typing import List
+from .universe import Universe
+from ..asset import Asset
 
 
 class DynamicUniverse(Universe):
@@ -15,10 +20,10 @@ class DynamicUniverse(Universe):
         Map of assets and their entry date.
     """
 
-    def __init__(self, asset_dates):
+    def __init__(self, asset_dates: dict):
         self.asset_dates = asset_dates
 
-    def get_assets(self, dt):
+    def get_assets(self, dt: pd.Timestamp) -> List[Asset]:
         """
         Obtain the list of assets in the Universe at a particular
         point in time. This will always return a static list
@@ -39,6 +44,7 @@ class DynamicUniverse(Universe):
             The list of Asset symbols in the static Universe.
         """
         return [
-            asset for asset, asset_date in self.asset_dates.items()
+            asset
+            for asset, asset_date in self.asset_dates.items()
             if asset_date is not None and dt >= asset_date
         ]

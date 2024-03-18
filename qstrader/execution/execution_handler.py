@@ -1,3 +1,16 @@
+""" execution_handler.py """
+
+from typing import Optional, List
+
+import pandas as pd
+
+from qstrader.execution.order import Order
+from qstrader.broker.broker import Broker
+from qstrader.asset.universe.universe import Universe
+from qstrader.execution.execution_algo.execution_algo import ExecutionAlgorithm
+from qstrader.data.backtest_data_handler import BacktestDataHandler
+
+
 class ExecutionHandler(object):
     """
     Handles the execution of a list of Orders output by the
@@ -24,12 +37,12 @@ class ExecutionHandler(object):
 
     def __init__(
         self,
-        broker,
-        broker_portfolio_id,
-        universe,
-        submit_orders=False,
-        execution_algo=None,
-        data_handler=None
+        broker: Broker,
+        broker_portfolio_id: str,
+        universe: Universe,
+        submit_orders: bool = False,
+        execution_algo: Optional[ExecutionAlgorithm] = None,
+        data_handler: Optional[BacktestDataHandler] = None,
     ):
         self.broker = broker
         self.broker_portfolio_id = broker_portfolio_id
@@ -38,7 +51,9 @@ class ExecutionHandler(object):
         self.execution_algo = execution_algo
         self.data_handler = data_handler
 
-    def _apply_execution_algo_to_rebalances(self, dt, rebalance_orders):
+    def _apply_execution_algo_to_rebalances(
+        self, dt: pd.Timestamp, rebalance_orders: List[Order]
+    ) -> List[Order]:
         """
         Generates a new list of Orders based on the appropriate
         execution strategy.
@@ -57,7 +72,7 @@ class ExecutionHandler(object):
         """
         return self.execution_algo(dt, rebalance_orders)
 
-    def __call__(self, dt, rebalance_orders):
+    def __call__(self, dt: pd.Timestamp, rebalance_orders: List[Order]) -> None:
         """
         Take the list of rebalanced Orders generated from the
         portfolio construction process and execute them at the
@@ -74,9 +89,7 @@ class ExecutionHandler(object):
         -------
         `None`
         """
-        final_orders = self._apply_execution_algo_to_rebalances(
-            dt, rebalance_orders
-        )
+        final_orders = self._apply_execution_algo_to_rebalances(dt, rebalance_orders)
 
         # If order submission is specified then send the
         # individual order items to the Broker instance

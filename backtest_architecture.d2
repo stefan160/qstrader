@@ -1,0 +1,61 @@
+# https://d2lang.com/tour/text
+BacktestTradingSession -> AlphaModel: {
+  label: "uses"
+}
+BacktestTradingSession -> RiskModel: {
+  label: "uses"
+  style: "dashed"
+  constraint: "false"
+}
+BacktestTradingSession -> Broker: {
+  label: "executes orders through"
+}
+BacktestTradingSession -> DataHandler: {
+  label: "requests data from"
+}
+Broker -> Portfolio: {
+  label: "contains"
+}
+Broker -> Order: {
+  label: "processes"
+}
+
+DataHandler -> CSVDailyBarDataSource: {
+  label: "retrieves data from"
+}
+
+Portfolio -> PositionHandler: {
+  label: "manages"
+}
+Portfolio -> Transaction: {
+  label: "records"
+}
+
+PositionHandler -> Asset: {
+  label: "tracks"
+}
+PositionHandler -> Position: {
+  label: "holds"
+}
+
+Order -> Transaction: {
+  label: "becomes"
+  style: "dashed"
+}
+
+AlphaModel -> Signal: {
+  label: "generates"
+  style: "dashed"
+}
+RiskModel -> Signal: {
+  label: "modifies"
+  style: "dashed"
+}
+
+# Optional components
+RiskModel: {
+  #   style: "dashed"
+}
+Signal: {
+  #   style: "dashed"
+}

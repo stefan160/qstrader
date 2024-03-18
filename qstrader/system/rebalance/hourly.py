@@ -1,8 +1,9 @@
-from qstrader.system.rebalance.rebalance import Rebalance
-from pandas.tseries.offsets import Hour
-from qstrader.utils.times import BusinessHours
+""" Hourly Rebalance Class. """
+
+from typing import List
 import pandas as pd
-import pytz
+from qstrader.system.rebalance.rebalance import Rebalance
+from qstrader.utils.times import BusinessHours
 
 
 class HourlyRebalance(Rebalance):
@@ -27,12 +28,15 @@ class HourlyRebalance(Rebalance):
         self.end_date = end_date
         self.pre_market = pre_market
         self.post_market = post_market
-        self.rebalances = [
+        self.rebalances = self._generate_rebalances()
+
+    def _generate_rebalances(self) -> List[pd.Timestamp]:
+        return [
             event
             for event in BusinessHours(
-                start_date=start_date,
-                end_date=end_date,
-                pre_market=pre_market,
-                post_market=post_market,
+                start_date=self.start_date,
+                end_date=self.end_date,
+                pre_market=self.pre_market,
+                post_market=self.post_market,
             ).rebalances
         ]

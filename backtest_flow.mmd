@@ -1,21 +1,35 @@
-graph TD
-    A[Start Backtest] --> B[Initialize TradingSession]
-    B --> C[Load Universe]
-    C --> D[Create SimulatedBroker]
-    D --> E[Create BacktestDataHandler]
-    E --> F[Create AlphaModel]
-    F --> G[Create RiskModel]
-    G --> H[Create PortfolioConstructionModel]
-    H --> I[Create ExecutionHandler]
-    I --> J[Create SimulationEngine]
-    J --> K[Run Trading Loop]
-    K --> L[Check Rebalance Event]
-    L -->|Yes| M[Generate Orders]
-    L -->|No| N[Update Portfolio Values]
-    M --> O[Execute Orders]
-    O --> N
-    N --> P[Update Statistics]
-    P --> Q[End of Backtest?]
-    Q -->|Yes| R[Output Results]
-    Q -->|No| K
-    R --> S[End Backtest]
+flowchart TD
+subgraph BacktesEngine
+    subgraph Initialize
+        direction LR
+        A[Set Universe]-->C[Initialize DataSource]
+        C-->B[Initialize BacktestTradingSession]
+        B-->X[Run BacktestLoop]
+        end
+    Initialize-->BacktestTradingSession
+    subgraph BacktestTradingSession
+        direction LR
+        D[Create SimulatedBroker]
+        D --> E[Create BacktestDataHandler]
+        E --> F[Create AlphaModel]
+        F --> G[Create RiskModel]
+        G --> H[Create PortfolioConstructionModel]
+        H --> I[Create ExecutionHandler]
+        I --> J[Create SimulationEngine]
+    end
+    Initialize --> BacktestLoop
+    subgraph BacktestLoop
+        direction LR
+        K[Begin Trading Run]
+        K --> L[Check Rebalance Event]
+        L -->|Yes| M[Create Orders]
+        L -->|No| N[Update Portfolio Values]
+        M --> O[Execute Orders]
+        O --> N
+        N --> P[Update Statistics]
+        P --> Q[End BacktestLoop?]
+        Q -->|Yes| R[Output Results]
+        Q -->|No| K
+        R --> S[End Backtest]
+    end
+end

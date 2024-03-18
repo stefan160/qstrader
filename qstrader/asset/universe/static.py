@@ -1,4 +1,10 @@
-from qstrader.asset.universe.universe import Universe
+""" Static Universe class. """
+
+from typing import List
+import pandas as pd
+
+from .universe import Universe
+from ..asset import Asset
 
 
 class StaticUniverse(Universe):
@@ -12,10 +18,10 @@ class StaticUniverse(Universe):
         The list of Asset symbols that form the StaticUniverse.
     """
 
-    def __init__(self, asset_list):
+    def __init__(self, asset_list: List[Asset]):
         self.asset_list = asset_list
 
-    def get_assets(self, dt):
+    def get_assets(self, dt: pd.Timestamp) -> List[Asset]:
         """
         Obtain the list of assets in the Universe at a particular
         point in time. This will always return a static list

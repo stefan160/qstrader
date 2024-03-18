@@ -1,3 +1,6 @@
+""" Weekly rebalance class."""
+
+from typing import List
 import pandas as pd
 import pytz
 
@@ -25,13 +28,7 @@ class WeeklyRebalance(Rebalance):
         Whether to carry out the rebalance at market open/close.
     """
 
-    def __init__(
-        self,
-        start_date,
-        end_date,
-        weekday,
-        pre_market=False
-    ):
+    def __init__(self, start_date, end_date, weekday, pre_market=False):
         self.weekday = self._set_weekday(weekday)
         self.start_date = start_date
         self.end_date = end_date
@@ -64,7 +61,7 @@ class WeeklyRebalance(Rebalance):
         else:
             return weekday.upper()
 
-    def _set_market_time(self, pre_market):
+    def _set_market_time(self, pre_market: bool) -> str:
         """
         Determines whether to use market open or market close
         as the rebalance time.
@@ -82,7 +79,7 @@ class WeeklyRebalance(Rebalance):
         """
         return "14:30:00" if pre_market else "21:00:00"
 
-    def _generate_rebalances(self):
+    def _generate_rebalances(self) -> List[pd.Timestamp]:
         """
         Output the rebalance timestamp list.
 
@@ -92,15 +89,11 @@ class WeeklyRebalance(Rebalance):
             The list of rebalance timestamps.
         """
         rebalance_dates = pd.date_range(
-            start=self.start_date,
-            end=self.end_date,
-            freq='W-%s' % self.weekday
+            start=self.start_date, end=self.end_date, freq="W-%s" % self.weekday
         )
 
         rebalance_times = [
-            pd.Timestamp(
-                "%s %s" % (date, self.pre_market_time), tz=pytz.utc
-            )
+            pd.Timestamp("%s %s" % (date, self.pre_market_time), tz=pytz.utc)
             for date in rebalance_dates
         ]
 

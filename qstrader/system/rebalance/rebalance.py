@@ -1,3 +1,5 @@
+""" Abstract Rebalance Class. """
+
 from abc import ABCMeta, abstractmethod
 
 
@@ -10,7 +12,5 @@ class Rebalance(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def output_rebalances(self):
-        raise NotImplementedError(
-            "Should implement output_rebalances()"
-        )
+    def _generate_rebalances(self):
+        raise NotImplementedError("Should implement _generate_rebalances()")

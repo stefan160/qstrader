@@ -1,4 +1,12 @@
+"""market_order.py"""
+
+from typing import List
+import pandas as pd
 from qstrader.execution.execution_algo.execution_algo import ExecutionAlgorithm
+from qstrader.execution.order import Order
+
+
+# pylint: disable=too-few-public-methods
 
 
 class MarketOrderExecutionAlgorithm(ExecutionAlgorithm):
@@ -7,7 +15,7 @@ class MarketOrderExecutionAlgorithm(ExecutionAlgorithm):
     of market Orders from the rebalance Orders.
     """
 
-    def __call__(self, dt, initial_orders):
+    def __call__(self, dt: pd.Timestamp, initial_orders: List[Order]) -> List[Order]:
         """
         Simply returns the initial orders list in a 'pass through' manner.
 

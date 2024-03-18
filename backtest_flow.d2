@@ -1,0 +1,44 @@
+TD: {
+  BacktesEngine
+  Initialize
+  BacktestTradingSession
+  BacktestLoop
+  SetUniverse(BacktesEngine, "Set Universe")
+  InitializeDataSource(BacktesEngine, "Initialize DataSource")
+  InitializeBTSession(Initialize, "Initialize BacktestTradingSession")
+  RunBTLoop(Initialize, "Run BacktestLoop")
+  CreateSimulatedBroker(BacktestTradingSession, "Create SimulatedBroker")
+  CreateBacktestDataHandler(BacktestTradingSession, "Create BacktestDataHandler")
+  CreateAlphaModel(BacktestTradingSession, "Create AlphaModel")
+  CreateRiskModel(BacktestTradingSession, "Create RiskModel")
+  CreatePortfolioConstructionModel(BacktestTradingSession, "Create PortfolioConstructionModel")
+  CreateExecutionHandler(BacktestTradingSession, "Create ExecutionHandler")
+  CreateSimulationEngine(BacktestTradingSession, "Create SimulationEngine")
+  BeginTradingRun(BacktestLoop, "Begin Trading Run")
+  CheckRebalanceEvent(BacktestLoop, "Check Rebalance Event")
+  CreateOrders(BacktestLoop, "Create Orders", "Yes")
+  UpdatePortfolioValues(BacktestLoop, "Update Portfolio Values", "No")
+  ExecuteOrders(BacktestLoop, "Execute Orders")
+  UpdateStatistics(BacktestLoop, "Update Statistics")
+  EndBacktestLoop(BacktestLoop, "End BacktestLoop?", "Yes")
+  OutputResults(BacktestLoop, "Output Results", "Yes")
+  EndBacktest(BacktestLoop, "End Backtest")
+  SetUniverse -> InitializeDataSource
+  InitializeDataSource -> InitializeBTSession
+  InitializeBTSession -> RunBTLoop
+  Initialize -> CreateSimulatedBroker
+  CreateSimulatedBroker -> CreateBacktestDataHandler
+  CreateBacktestDataHandler -> CreateAlphaModel
+  CreateAlphaModel -> CreateRiskModel
+  CreateRiskModel -> CreatePortfolioConstructionModel
+  CreatePortfolioConstructionModel -> CreateExecutionHandler
+  CreateExecutionHandler -> CreateSimulationEngine
+  Initialize -> BeginTradingRun
+  BeginTradingRun -> CheckRebalanceEvent
+  CheckRebalanceEvent -> CreateOrders
+  CheckRebalanceEvent -> UpdatePortfolioValues
+  CreateOrders -> ExecuteOrders
+  ExecuteOrders -> UpdatePortfolioValues
+  UpdatePortfolioValues -> UpdateStatistics
+  UpdateStatistics -> EndBacktest
+}

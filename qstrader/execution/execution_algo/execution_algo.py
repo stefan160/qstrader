@@ -1,4 +1,13 @@
+"""execution_algo.py"""
+
+from typing import List
 from abc import ABCMeta, abstractmethod
+
+import pandas as pd
+from qstrader.execution.order import Order
+
+
+# pylint: disable=too-few-public-methods
 
 
 class ExecutionAlgorithm(object):
@@ -11,7 +20,5 @@ class ExecutionAlgorithm(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def __call__(self, dt, initial_orders):
-        raise NotImplementedError(
-            "Should implement __call__()"
-        )
+    def __call__(self, dt: pd.Timestamp, initial_orders: List[Order]):
+        raise NotImplementedError("Should implement __call__()")

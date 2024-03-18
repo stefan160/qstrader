@@ -1,7 +1,9 @@
+""" Universe Meta Class. """
+
 from abc import ABCMeta, abstractmethod
 
 
-class Universe(object):
+class Universe:
     """
     Interface specification for an Asset Universe.
     """
@@ -10,6 +12,5 @@ class Universe(object):
 
     @abstractmethod
     def get_assets(self, dt):
-        raise NotImplementedError(
-            "Should implement get_assets()"
-        )
+        """get assets"""
+        raise NotImplementedError("Should implement get_assets()")

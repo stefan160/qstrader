@@ -1,4 +1,6 @@
-from qstrader.asset.asset import Asset
+""" Equity asset class. """
+
+from .asset import Asset
 
 
 class Equity(Asset):
@@ -20,23 +22,14 @@ class Equity(Asset):
         as UK stamp duty.
     """
 
-    def __init__(
-        self,
-        name,
-        symbol,
-        tax_exempt=True
-    ):
+    def __init__(self, name: str, symbol: str, tax_exempt: bool = True):
         self.cash_like = False
         self.name = name
         self.symbol = symbol
         self.tax_exempt = tax_exempt
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         String representation of the Equity Asset.
         """
-        return (
-            "Equity(name='%s', symbol='%s', tax_exempt=%s)" % (
-                self.name, self.symbol, self.tax_exempt
-            )
-        )
+        return f"Equity(name={self.name}, symbol={self.symbol}, tax_exempt={self.tax_exempt}"
